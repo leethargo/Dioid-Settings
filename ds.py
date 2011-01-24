@@ -1,12 +1,16 @@
-# dioid settings
-#
-# a idempotent semiring for combinatorial settings,
-# with two operation:
-#  + : DS x DS -> DS, a union of different values (for the same keys).
-#  * : DS x DS -> DS, a cartesian product of values for different keys,
-#                     e.g., nested for-loops.
-#  and neutral elements 0 = []       (the empty set)
-#                       1 = [dict()] (the set containing an empty dictionary)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# dioid settings                                                              #
+#                                                                             #
+# 2011 - Robert Schwarz <schwarz@zib.de>                                      #
+#                                                                             #
+# an idempotent semiring for combinatorial settings,                          #
+# with two operation:                                                         #
+#  + : DS x DS -> DS, a union of different values (for the same keys).        #
+#  * : DS x DS -> DS, a cartesian product of values for different keys,       #
+#                     e.g., nested for-loops.                                 #
+#  and neutral elements 0 = []       (the empty set)                          #
+#                       1 = [dict()] (the set containing an empty dictionary) #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 def sum(dss):
     result = DS()
@@ -23,11 +27,7 @@ def product(dss):
 
 def DS(key=None, value=None):
     if isinstance(key, tuple):
-        for values in value:
-            # print 'values', values
-            # print 'zip', zip(key, values)
-            # print 'map', [DS(k, v) for k,v in zip(key, values)]
-            return sum(product( [DS(k, v) for k,v in zip(key, values)] ) for values in value)
+        return sum(product(DS(k, v) for k,v in zip(key, vs)) for vs in value)
     elif hasattr(value, '__iter__'):
         return sum((DioidSettings(key, v) for v in value))
     else:
