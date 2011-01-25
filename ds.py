@@ -12,24 +12,13 @@
 #                       1 = [dict()] (the set containing an empty dictionary) #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-def sum(dss):
-    result = DS()
-    for ds in dss:
-        result += ds
-    return result
-
-def product(dss):
-    result = DS()
-    result.set.append({})
-    for ds in dss:
-        result *= ds
-    return result
+import itertools
 
 def DS(key=None, value=None):
     if isinstance(key, tuple):
-        return sum(product(DS(k, v) for k,v in zip(key, vs)) for vs in value)
+        return DSSum(DSProduct(DS(k, v) for k,v in zip(key, vs)) for vs in value)
     elif hasattr(value, '__iter__'):
-        return sum((DioidSettings(key, v) for v in value))
+        return DSSum((DioidSettings(key, v) for v in value))
     else:
         return DioidSettings(key, value)
 
@@ -37,42 +26,46 @@ class DioidSettings(object):
     """Contains a set of dictionaries, and implements + and *"""
 
     def __init__(self, key=None, value=None):
-        self.set = []
+        self.d = None
         if not key is None:
-            d = dict()
-            d[key] = value
-            self.set.append(d)
+            self.d = {}
+            if not value is None:
+                self.d[key] = value
 
     def __str__(self):
-        if self.set == []:
-            return '[ 0 ]'
-        elif self.set == [{}]:
-            return '[ 1 ]'
-        else:
-            return '[\n ' + '\n '.join(str(s) for s in self.set) + '\n]'
+        return str(list(self))
 
     def __add__(self, other):
-        result = DioidSettings()
-        result.set = self.set + other.set
-        return result
+        return DSSum([self, other])
 
     def __mul__(self, other):
-        result = DioidSettings()
-        for sd in self.set:
-            for od in other.set:
-                rd = {}
-                rd.update(sd)
-                rd.update(od)
-                # make unicity test for idempotent multiplication
-                if not rd in result.set:
-                    result.set.append(rd)
-        return result
+        return DSProduct([self, other])
 
-    def __eq__(self, other):
-        return self.set == other.set
+    def __iter__(self):
+        if not self.d is None:
+            yield self.d
 
-# neutral element w.r.t. +
-zero = sum([])
 
-# neutral element w.r.t. *
-one = product([])
+class DSSum(DioidSettings):
+    """Represents a sum of two DioidSettings"""
+
+    def __init__(self, summands):
+        self.summands = list(summands)
+
+    def __iter__(self):
+        for s in self.summands:
+            for d in s:
+                yield d
+
+class DSProduct(DioidSettings):
+    """Represents a product of two DioidSettings"""
+
+    def __init__(self, factors):
+        self.factors = list(factors)
+
+    def __iter__(self):
+        for p in itertools.product(*self.factors):
+            d = {}
+            for f in p:
+                d.update(f)
+            yield d
