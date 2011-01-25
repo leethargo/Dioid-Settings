@@ -32,11 +32,13 @@ def eval_subs(subs_path):
 def name_keys(ds):
     number = 0
     counter = {}
+    col_width = {}
     for d in ds:
         number += 1
         for k,v in d.iteritems():
-            counter[k] = counter.get(k, 0) + 1
-    return number, [k for k,v in counter.iteritems() if v > 1]
+            counter[k]   = counter.get(k, 0) + 1
+            col_width[k] = max(col_width.get(k, len(k)), len(str(v)))
+    return number, [k for k,v in counter.iteritems() if v > 1], col_width
 
 def main():
     parser = optparse.OptionParser(usage='usage: %prog [options] <template>... <substitutions>')
@@ -53,12 +55,10 @@ def main():
 
     # get settings and determine active keys
     ds = eval_subs(subs_path)
-    number, keys = name_keys(ds)
+    number, keys, col_width = name_keys(ds)
 
     # prepare progress bar
-    step = number / 30
-    if step == 0:
-        options.quiet = True
+    step = number / 30 + 1
 
     # first read in all template files once
     tmpls = {}
@@ -69,14 +69,16 @@ def main():
         tmpl_file.close()
 
     runs_file = open('runs', 'w')
+    runs_file.write('#  id  ' + '  '.join(k.ljust(col_width[k]) for k in keys) + '\n')
     for i, d in enumerate(ds):
         # print progress bar
-        if not options.quiet and ((i+1) % step) == 0:
-            sys.stdout.write('\r%5d / %5d [%-30s]' % (i+1, number, '='*(i/step) + '>'))
+        if not options.quiet and step != 0 and ((i+1) % step) == 0:
+            sys.stdout.write('\r%5d / %5d [%-30s]' % (i+1, number, '='*(i/step)))
             sys.stdout.flush()
 
+        # determine current key
         ids = ('%05d' % i)
-        key = ','.join(('%s=%s' % (k, str(d[k]))) for k in keys)
+        key = '  '.join(str(d[k]).rjust(col_width[k]) for k in keys)
 
         try:
             os.mkdir(ids)
@@ -84,6 +86,7 @@ def main():
             print 'Error, will not overwrite existing file:', e.filename
             sys.exit(1)
 
+        # write all template files
         for tmpl_path, tmpl in tmpls.iteritems():
             result_file = open(os.path.join(ids, ids + '.' + tmpl_path), 'w')
             if options.safe:
@@ -92,7 +95,9 @@ def main():
                 result = easy_subs(tmpl, d)
             result_file.write(result)
             result_file.close()
-        runs_file.write(ids + ' ' + key + '\n')
+
+        # write line in runs file
+        runs_file.write(ids + '  ' + key + '\n')
 
     # finish progress bar
     if not options.quiet:
