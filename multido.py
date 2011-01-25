@@ -30,16 +30,20 @@ def eval_subs(subs_path):
     return result
 
 def name_keys(ds):
+    number = 0
     counter = {}
-    for d in ds.set:
+    for d in ds:
+        number += 1
         for k,v in d.iteritems():
             counter[k] = counter.get(k, 0) + 1
-    return [k for k,v in counter.iteritems() if v > 1]
+    return number, [k for k,v in counter.iteritems() if v > 1]
 
 def main():
     parser = optparse.OptionParser(usage='usage: %prog [options] <template>... <substitutions>')
     parser.add_option('-s', '--safe', action="store_true", default=False,
                       help='substitute safely and abort with missing keys')
+    parser.add_option('-q', '--quiet', action="store_true", default=False,
+                      help='do not print progress counter')
     (options, args) = parser.parse_args()
     if len(args) < 2:
         parser.error('incorrect number of arguments')
@@ -47,8 +51,14 @@ def main():
     tmpl_paths = args[:-1]
     subs_path  = args[-1]
 
+    # get settings and determine active keys
     ds = eval_subs(subs_path)
-    keys = name_keys(ds)
+    number, keys = name_keys(ds)
+
+    # prepare progress bar
+    step = number / 30
+    if step == 0:
+        options.quiet = True
 
     # first read in all template files once
     tmpls = {}
@@ -59,7 +69,12 @@ def main():
         tmpl_file.close()
 
     runs_file = open('runs', 'w')
-    for i, d in enumerate(ds.set):
+    for i, d in enumerate(ds):
+        # print progress bar
+        if not options.quiet and ((i+1) % step) == 0:
+            sys.stdout.write('\r%5d / %5d [%-30s]' % (i+1, number, '='*(i/step) + '>'))
+            sys.stdout.flush()
+
         ids = ('%05d' % i)
         key = ','.join(('%s=%s' % (k, str(d[k]))) for k in keys)
 
@@ -78,6 +93,12 @@ def main():
             result_file.write(result)
             result_file.close()
         runs_file.write(ids + ' ' + key + '\n')
+
+    # finish progress bar
+    if not options.quiet:
+        sys.stdout.write('\r%5d / %5d [%-30s]' % (number, number, '='*30))
+        sys.stdout.flush()
+
     runs_file.close()
 
 if __name__ == '__main__':
