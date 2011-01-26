@@ -1,0 +1,17 @@
+
+# add atomic settings to describe different options (for the same key)
+# param = DS('param', 'aaa') + DS('param', 'bbb') + DS('param', 'ccc')
+
+# or use syntactic sugar for the above:
+param = DS('param', [ s*3 for s in ['a', 'b', 'c'] ])
+
+# multiply atomic settings, to combine them:
+# bounds_single = DS('time', 3600) * DS('cores',  1)
+# bounds_multi  = DS('time',   60) * DS('cores', 64)
+# bounds = bounds_single + bounds_multi
+
+# again, there is a shorthand:
+bounds = DS(('time', 'cores'), [(3600, 1), (60, 64)])
+
+# simply save the total expression as 'result'
+result = param * bounds

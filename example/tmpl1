@@ -1,0 +1,5 @@
+# Here, we try to substitute values for the keys (beginnig with $)
+
+set parameter_xyz = $param
+set number cores  = $cores
+set timelimit     = $time

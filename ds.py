@@ -3,13 +3,10 @@
 #                                                                             #
 # 2011 - Robert Schwarz <schwarz@zib.de>                                      #
 #                                                                             #
-# an idempotent semiring for combinatorial settings,                          #
-# with two operation:                                                         #
-#  + : DS x DS -> DS, a union of different values (for the same keys).        #
+# A semiring for combinatorial settings, with two operations:                 #
+#  + : DS x DS -> DS, a concatenation of different values (for the same keys) #
 #  * : DS x DS -> DS, a cartesian product of values for different keys,       #
 #                     e.g., nested for-loops.                                 #
-#  and neutral elements 0 = []       (the empty set)                          #
-#                       1 = [dict()] (the set containing an empty dictionary) #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import itertools

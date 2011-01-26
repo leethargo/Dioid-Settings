@@ -1,0 +1,7 @@
+# Just another example
+
+{
+  'parameter_xyz' : '${param}'
+  'number cores'  : '${cores}'
+  'timelimit'     : '${time}'
+}
