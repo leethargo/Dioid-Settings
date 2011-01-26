@@ -1,0 +1,39 @@
+dioid settings & multido
+========================
+
+This script will take an expression of parameters and produce a
+directory with templated setting files for every possible
+combination.
+
+The expression supports (key, value) pairs as atoms and two
+operations:
+
+ '+' usually operations on expressions sharing the same keys, but with
+ diffing values. With addition, you can declare diverging options.
+
+ '*' operations on expressions with different keys. Multiplication
+ simulates nested for-loops, where every possible value combination
+ of the first factor is combined with every possible value
+ combination of the second factor.
+
+
+See the example for explanation of the syntax.
+
+In 'subs', the expression is formed. This file will be evaluated as
+Python, so you can insert your magic here.
+
+There are also two templates, with matching keys.
+
+Finally, you should call multido.py with the above files as arguments
+to produce the output. Enter 'multido.py -h' to print the usage.
+
+---
+
+Fun facts: The operations are associative, quasi communatative and
+distributive. The empty DioidSetting kind of corresponds to the 0
+element. Thus, the resulting settings form a semirng.
+
+In an earlier implementation using lists instead of generators, the
+addition resulted in a union, instead of a concatenation. It was also
+possible to construct a 1 element, yielding the algebraic structure of
+a dioid, hence the name.
