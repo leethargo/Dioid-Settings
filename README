@@ -2,7 +2,7 @@ dioid settings & multido
 ========================
 
 This script will take an expression of parameters and produce a
-directory with templated setting files for every possible
+directory with template setting files for every possible
 combination.
 
 The expression supports (key, value) pairs as atoms and two
@@ -29,9 +29,10 @@ to produce the output. Enter 'multido.py -h' to print the usage.
 
 ---
 
-Fun facts: The operations are associative, quasi communatative and
+Fun facts: The operations are associative, quasi commutative and
 distributive. The empty DioidSetting kind of corresponds to the 0
-element. Thus, the resulting settings form a semirng.
+element. Thus, the resulting settings form a semirng (without the
+neutral element of multiplication, 'i').
 
 In an earlier implementation using lists instead of generators, the
 addition resulted in a union, instead of a concatenation. It was also
